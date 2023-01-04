@@ -1,4 +1,4 @@
-# blockchain-developer-bootcamp-final-project
+### blockchain-developer-bootcamp-final-project
 # THE BIM COORDINATE ORACLE 
 
 This app allows users to receive an IFC BIM file from designers pre assigned, and automatically validate the coordinates in the file to ensure that they are correct. If the coordinates are valid, the app self initiates payment to the designer using the Projects smart contract. This automates the payment process and ensures that designers are only paid if their work meets the required specifications.
