@@ -15,3 +15,9 @@ To protect against the "Using Specific Compiler Pragma" attack, it is recommende
 
 To protect against the "Checks-Effects-Interactions" attack, the payRecipient function first checks that the caller is the owner of the contract using the isOwner function. It then calls the send function of the Payment contract to send money to the recipient. Finally, it checks the return value of the send function to ensure that the payment was successful. This avoids any state changes after external calls, as the state changes (sending the payment) are only performed if the checks (caller is owner and payment was successful) are successful.
 
+## Try it yourself
+
+Clone the repository https://github.com/babivillanova/blockchain-developer-bootcamp-final-project
+run the code
+yarn
+yarn start
