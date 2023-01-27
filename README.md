@@ -17,7 +17,10 @@ To protect against the "Checks-Effects-Interactions" attack, the payRecipient fu
 
 ## Try it yourself
 
-Clone the repository https://github.com/babivillanova/blockchain-developer-bootcamp-final-project
+Clone the repository https://github.com/babivillanova/blockchain-developer-bootcamp-final-project 
+
 run the code
+
 yarn
+
 yarn start
