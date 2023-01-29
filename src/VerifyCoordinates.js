@@ -1,32 +1,34 @@
 import React, { useState } from 'react';
-import Web3 from 'web3';
-import { IfcGeometry, IfcSite } from 'ifc-geometry';
+import { ethers } from 'ethers';
+import { parseSync } from 'web-ifc';
 
 function VerifyCoordinates() {
-  const [web3, setWeb3] = useState(null);
-  const [account, setAccount] = useState(null);
+  const [provider, setProvider] = useState(null);
+  const [signer, setSigner] = useState(null);
   const [contract, setContract] = useState(null);
   const [coordinateSystem, setCoordinateSystem] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function connectToWeb3() {
+    async function connectToEthereum() {
       // Detect if MetaMask is installed
       if (window.ethereum) {
         // Connect to MetaMask
-        const web3 = new Web3(window.ethereum);
-        setWeb3(web3);
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        setProvider(provider);
 
         // Get the current account
-        const accounts = await web3.eth.getAccounts();
-        setAccount(accounts[0]);
+        const accounts = await provider.listAccounts();
+        const signer = provider.getSigner(accounts[0]);
+        setSigner(signer);
 
         // Set up the smart contract connection
-        const contract = new web3.eth.Contract(
+        const contract = new ethers.Contract(
+          // Replace with the address of your smart contract
+          '',
           // Replace with the ABI of your smart contract
           [],
-          // Replace with the address of your smart contract
-          ''
+          signer
         );
         setContract(contract);
       } else {
@@ -34,28 +36,38 @@ function VerifyCoordinates() {
       }
     }
 
-    connectToWeb3();
+    connectToEthereum();
   }, []);
 
   async function handleFileChange(event) {
     try {
       // Parse the IFC file
       const file = event.target.files[0];
-      const geometry = new IfcGeometry(file);
-      const site = geometry.getSite();
+      const { entities } = parseSync(file);
 
       // Verify the coordinate system
-      if (site instanceof IfcSite) {
-        const { latitude, longitude, elevation } = site;
-        setCoordinateSystem({ latitude, longitude, elevation });
+      const site = entities.find(entity => entity.type === 'IFCSITE');
+      if (site) {
+        const {
+          ObjectPlacement: {
+            PlacementRelTo: {
+              IfcLocalPlacement: {
+                Location: {
+                  Coords: [x, y, z]
+                }
+              }
+            }
+          }
+        } = site;
+        setCoordinateSystem({ x, y, z });
 
         // Send money to the specified account
-        await contract.methods.sendMoney(
+        await contract.sendMoney(
           // Replace with the address of the recipient
           '',
           // Replace with the amount of money to send
           0
-        ).send({ from: account });
+        );
       } else {
         setError('Coordinate system not found');
       }
@@ -66,22 +78,22 @@ function VerifyCoordinates() {
 
   return (
     <div>
-      {web3 && (
+      {provider && (
         <form>
           <label htmlFor="file">Select an IFC file:</label>
           <input type="file" name="file" onChange={handleFileChange} />
         </form>
       )}
-      {!web3 && <p>Web3 not detected</p>}
+      {!provider && <p>Ethereum provider not detected</p>}
       {coordinateSystem && (
         <p>
-          Coordinate system: {coordinateSystem.latitude},{coordinateSystem.longitude},
-          {coordinateSystem.elevation}
-        </p>
-      )}
-      {error && <p>Error: {error}</p>}
-    </div>
-  );
+          Coordinate system : {coordinateSystem.x},{coordinateSystem.y},
+{coordinateSystem.z}
+</p>
+)}
+{error && <p>Error: {error}</p>}
+</div>
+);
 }
 
 export default VerifyCoordinates;

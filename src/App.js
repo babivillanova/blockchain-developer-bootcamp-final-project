@@ -1,44 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import Web3 from 'web3';
+import { ethers } from 'ethers';
 import VerifyCoordinates from './VerifyCoordinates';
 
 function App() {
-  const [web3, setWeb3] = useState(null);
-  const [account, setAccount] = useState(null);
+  const [provider, setProvider] = useState(null);
+  const [signer, setSigner] = useState(null);
   const [contract, setContract] = useState(null);
-  const [contractState, setContractState] = useState(null);
+  const [state, setState] = useState(null);
   const [transactionStatus, setTransactionStatus] = useState(null);
 
   useEffect(() => {
-    async function connectToWeb3() {
+    async function connectToEthereum() {
       // Detect if MetaMask is installed
       if (window.ethereum) {
         // Connect to MetaMask
-        const web3 = new Web3(window.ethereum);
-        setWeb3(web3);
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        setProvider(provider);
 
         // Get the current account
-        const accounts = await web3.eth.getAccounts();
-        setAccount(accounts[0]);
+        const accounts = await provider.listAccounts();
+        const signer = provider.getSigner(accounts[0]);
+        setSigner(signer);
 
         // Set up the smart contract connection
-        const contract = new web3.eth.Contract(
+        const contract = new ethers.Contract(
+          // Replace with the address of your smart contract
+          '',
           // Replace with the ABI of your smart contract
           [],
-          // Replace with the address of your smart contract
-          ''
+          signer
         );
         setContract(contract);
 
         // Get the current state of the smart contract
-        const contractState = await contract.methods.getState().call();
-        setContractState(contractState);
+        const state = await contract.getState();
+        setState(state);
       } else {
         console.error('MetaMask is not installed');
       }
     }
 
-    connectToWeb3();
+    connectToEthereum();
   }, []);
 
   async function handleTransaction(event) {
@@ -48,11 +50,11 @@ function App() {
     const value = event.target.elements.value.value;
 
     // Send the transaction to update the smart contract state
-    await contract.methods.setState(value).send({ from: account });
+    await contract.setState(value);
 
     // Get the updated state of the smart contract
-    const updatedContractState = await contract.methods.getState().call();
-    setContractState(updatedContractState);
+    const updatedState = await contract.getState();
+    setState(updatedState);
 
     // Display a message indicating the transaction was successful
     setTransactionStatus('Transaction successful');
@@ -60,11 +62,11 @@ function App() {
 
   return (
     <div>
-      {web3 && (
+      {provider && (
         <>
-          <p>Web3 detected</p>
-          <p>Account: {account}</p>
-          <p>Contract state: {contractState}</p>
+          <p>Ethereum provider detected</p>
+          <p>Account: {signer.address}</p>
+          <p>Contract state: {state}</p>
           <form onSubmit={handleTransaction}>
             <label htmlFor="value">Value:</label>
             <input type="text" name="value" />
@@ -73,7 +75,7 @@ function App() {
           {transactionStatus && <p>{transactionStatus}</p>}
         </>
       )}
-      {!web3 && <p>Web3 not detected</p>}
+      {!provider && <p>Ethereum provider not detected</p>}
       <VerifyCoordinates />
     </div>
   );
