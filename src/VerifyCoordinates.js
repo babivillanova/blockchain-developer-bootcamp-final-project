@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { parseSync } from 'web-ifc';
+import { IfcSite } from 'web-ifc';
 
 function VerifyCoordinates() {
   const [provider, setProvider] = useState(null);
@@ -40,40 +40,7 @@ function VerifyCoordinates() {
   }, []);
 
   async function handleFileChange(event) {
-    try {
-      // Parse the IFC file
-      const file = event.target.files[0];
-      const { entities } = parseSync(file);
 
-      // Verify the coordinate system
-      const site = entities.find(entity => entity.type === 'IFCSITE');
-      if (site) {
-        const {
-          ObjectPlacement: {
-            PlacementRelTo: {
-              IfcLocalPlacement: {
-                Location: {
-                  Coords: [x, y, z]
-                }
-              }
-            }
-          }
-        } = site;
-        setCoordinateSystem({ x, y, z });
-
-        // Send money to the specified account
-        await contract.sendMoney(
-          // Replace with the address of the recipient
-          '',
-          // Replace with the amount of money to send
-          0
-        );
-      } else {
-        setError('Coordinate system not found');
-      }
-    } catch (err) {
-      setError(err.message);
-    }
   }
 
   return (

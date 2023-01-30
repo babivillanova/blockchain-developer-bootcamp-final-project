@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect  } from 'react';
 import { ethers } from 'ethers';
 import VerifyCoordinates from './VerifyCoordinates';
+import IfcSiteViewer from './SiteViewer';
+import IfcSiteReader from './IFCSite';
 
 function App() {
   const [provider, setProvider] = useState(null);
@@ -62,7 +64,7 @@ function App() {
 
   return (
     <div>
-      {provider && (
+      {/* {provider && signer && (
         <>
           <p>Ethereum provider detected</p>
           <p>Account: {signer.address}</p>
@@ -75,8 +77,8 @@ function App() {
           {transactionStatus && <p>{transactionStatus}</p>}
         </>
       )}
-      {!provider && <p>Ethereum provider not detected</p>}
-      <VerifyCoordinates />
+      {!provider && <p>Ethereum provider not detected</p>} */}
+      <IfcSiteReader />
     </div>
   );
 }
